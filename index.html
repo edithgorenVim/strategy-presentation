@@ -636,14 +636,15 @@
         <div class="container">
             <div class="section-header">
                 <h2>Organizational Structure</h2>
-                <p>Department-based hierarchy enabling cross-functional collaboration</p>
+                <p>Business Unit hierarchy in Vim Ops Hub enabling cross-functional collaboration</p>
             </div>
 
             <div class="org-tree">
+                <!-- Workspace Level -->
                 <div class="org-level">
-                    <div class="org-node leadership">
-                        <h4>Leadership</h4>
-                        <p>Strategic Direction</p>
+                    <div class="org-node" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-color: transparent; font-weight: 700; font-size: 1.1rem;">
+                        <h4>Workspace: Vim</h4>
+                        <p>Enterprise Level</p>
                     </div>
                 </div>
 
@@ -651,27 +652,27 @@
                     <div class="org-line" style="left: 50%;"></div>
                 </div>
 
+                <!-- Teamspace Level -->
+                <div class="org-level">
+                    <div class="org-node leadership">
+                        <h4>Teamspace: Vim Ops Hub</h4>
+                        <p>Teamspace Home</p>
+                    </div>
+                </div>
+
+                <div class="org-connections">
+                    <div class="org-line" style="left: 50%;"></div>
+                </div>
+
+                <!-- Business Units -->
+                <div style="text-align: center; margin: 2rem 0; color: var(--accent-color); font-size: 1.2rem; font-weight: 600;">
+                    Business Units
+                </div>
+
                 <div class="dept-grid">
-                    <div class="dept-card">
-                        <h4>🔧 Engineering</h4>
-                        <ul>
-                            <li>Full Stack Development</li>
-                            <li>R&D Group</li>
-                            <li>DevOps & Infrastructure</li>
-                        </ul>
-                    </div>
-
-                    <div class="dept-card">
-                        <h4>🎨 Product & Design</h4>
-                        <ul>
-                            <li>Product Management</li>
-                            <li>UX/UI Design</li>
-                            <li>Product Strategy</li>
-                        </ul>
-                    </div>
-
-                    <div class="dept-card">
-                        <h4>⚙️ Operations</h4>
+                    <!-- G&A Business Unit -->
+                    <div class="dept-card" style="border-color: rgba(239, 68, 68, 0.3);">
+                        <h4>📋 G&A (General & Administrative)</h4>
                         <ul>
                             <li>IT & Security</li>
                             <li>Finance</li>
@@ -679,30 +680,35 @@
                         </ul>
                     </div>
 
-                    <div class="dept-card">
-                        <h4>📊 Data & Analytics</h4>
+                    <!-- Connect Business Unit -->
+                    <div class="dept-card" style="border-color: rgba(16, 185, 129, 0.3);">
+                        <h4>🔗 Connect</h4>
                         <ul>
-                            <li>Data Engineering</li>
-                            <li>Analytics & Insights</li>
-                            <li>Business Intelligence</li>
+                            <li>Product</li>
+                            <li>Engineering</li>
+                            <li>Marketing</li>
+                            <li>Customers</li>
                         </ul>
                     </div>
 
-                    <div class="dept-card">
-                        <h4>📈 Marketing & Growth</h4>
+                    <!-- VBC Business Unit -->
+                    <div class="dept-card" style="border-color: rgba(59, 130, 246, 0.3);">
+                        <h4>💊 VBC (Value-Based Care)</h4>
                         <ul>
-                            <li>Marketing Operations</li>
-                            <li>Growth Strategy</li>
-                            <li>Brand & Content</li>
+                            <li>Product</li>
+                            <li>Engineering</li>
+                            <li>Marketing</li>
+                            <li>Customers</li>
                         </ul>
                     </div>
 
-                    <div class="dept-card">
-                        <h4>👥 Customer Success</h4>
+                    <!-- Care Collaboration Business Unit -->
+                    <div class="dept-card" style="border-color: rgba(245, 158, 11, 0.3);">
+                        <h4>🤝 Care Collaboration</h4>
                         <ul>
-                            <li>Care Collaboration</li>
-                            <li>Support Operations</li>
-                            <li>Customer Experience</li>
+                            <li>Cross-functional team</li>
+                            <li>Collaboration workflows</li>
+                            <li>Care coordination</li>
                         </ul>
                     </div>
                 </div>
