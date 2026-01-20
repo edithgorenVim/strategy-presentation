@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Update: The AI-First Operating System (Notion)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-bg: #0F0F0F;
+            --secondary-bg: #1A1A1A;
+            --accent-color: #6B5CE7;
+            --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --text-primary: #E8E8E8;
+            --text-secondary: #A0A0A0;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: var(--accent-gradient);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: drift 20s linear infinite;
+            opacity: 0.3;
+        }
+
+        @keyframes drift {
+            from { transform: translate(0, 0); }
+            to { transform: translate(50px, 50px); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+
+        .hero .meta {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        /* Section Styling */
+        section {
+            padding: 6rem 0;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 1rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-header p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Problem/Solution Cards */
+        .split-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(107, 92, 231, 0.2);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .card li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .card li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+
+        /* Problem specific styling */
+        .problem-card {
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        .problem-card .card-icon {
+            color: var(--error-color);
+        }
+
+        /* Solution specific styling */
+        .solution-card {
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .solution-card .card-icon {
+            color: var(--success-color);
+        }
+
+        /* Organizational Structure */
+        .org-tree {
+            margin: 4rem auto;
+            max-width: 1200px;
+        }
+
+        .org-level {
+            display: flex;
+            justify-content: center;
+            margin: 2rem 0;
+            position: relative;
+        }
+
+        .org-node {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 0.75rem;
+            padding: 1.5rem 2rem;
+            margin: 0 1rem;
+            min-width: 200px;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .org-node:hover {
+            border-color: var(--accent-color);
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(107, 92, 231, 0.3);
+        }
+
+        .org-node.leadership {
+            background: var(--accent-gradient);
+            border-color: transparent;
+            font-weight: 700;
+        }
+
+        .org-node h4 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .org-node p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Connection lines */
+        .org-connections {
+            position: relative;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .org-line {
+            width: 2px;
+            height: 50px;
+            background: var(--card-border);
+            position: absolute;
+        }
+
+        .org-line-horizontal {
+            height: 2px;
+            background: var(--card-border);
+            position: absolute;
+            top: 0;
+        }
+
+        /* n8n Workflow */
+        .workflow-diagram {
+            margin: 4rem auto;
+            padding: 3rem;
+            background: #f5f5f5;
+            border-radius: 1rem;
+        }
+
+        /* Pillars */
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .pillar-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pillar-card::before {
+            content: attr(data-number);
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            font-size: 8rem;
+            font-weight: 900;
+            color: rgba(107, 92, 231, 0.1);
+        }
+
+        .pillar-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .pillar-card .requirement {
+            background: rgba(107, 92, 231, 0.1);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+
+        /* Implementation Timeline */
+        .timeline {
+            position: relative;
+            margin: 4rem auto;
+            max-width: 900px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: var(--card-border);
+        }
+
+        .timeline-item {
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-left: auto;
+            text-align: left;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-right: auto;
+            text-align: right;
+        }
+
+        .timeline-content {
+            width: 45%;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            left: 50%;
+            transform: translate(-50%, 50%);
+            width: 20px;
+            height: 20px;
+            background: var(--accent-color);
+            border: 4px solid var(--primary-bg);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .timeline-content h3 {
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-content .phase {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        /* Architecture Diagram */
+        .architecture-diagram {
+            margin: 4rem auto;
+            padding: 3rem;
+            background: var(--secondary-bg);
+            border-radius: 1rem;
+        }
+
+        .arch-layer {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .arch-layer h4 {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .arch-components {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .arch-component {
+            background: rgba(107, 92, 231, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .timeline-content {
+                width: 90%;
+                margin: 0 auto !important;
+                text-align: left !important;
+            }
+
+            .timeline::before {
+                left: 20px;
+            }
+
+            .timeline-marker {
+                left: 20px;
+            }
+
+            .workflow-nodes {
+                flex-direction: column;
+                min-width: auto;
+            }
+
+            .workflow-arrow {
+                transform: rotate(90deg);
+            }
+
+            .org-level {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* Scroll Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: var(--accent-gradient);
+            padding: 4rem 2rem;
+            text-align: center;
+            border-radius: 1rem;
+            margin: 4rem 0;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .cta-list {
+            text-align: left;
+            max-width: 600px;
+            margin: 2rem auto;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 2rem;
+            border-radius: 0.75rem;
+        }
+
+        .cta-list li {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cta-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* Department Tree Specific Styles */
+        .dept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .dept-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .dept-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(107, 92, 231, 0.3);
+        }
+
+        .dept-card h4 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--accent-color);
+        }
+
+        .dept-card ul {
+            list-style: none;
+        }
+
+        .dept-card li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .dept-card li::before {
+            content: '▸';
+            position: absolute;
+            left: 0;
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Strategy Update: The "AI-First" Operating System</h1>
+            <p class="subtitle">Transforming Vim from Fragmented Tools to Unified Intelligence</p>
+            <p class="meta">Owner: Edith Goren | Status: Draft / Q1 2026</p>
+        </div>
+    </section>
+
+    <!-- Purpose Section -->
+    <section id="purpose">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why This Matters Now</h2>
+                <p>Our operational complexity has outpaced our tooling. This is our strategy to move from fragmented silos to a centralized, AI-driven operating system.</p>
+            </div>
+
+            <div class="split-view">
+                <div class="card problem-card">
+                    <span class="card-icon">⚠️</span>
+                    <h3>The Operational Reality</h3>
+                    <ul>
+                        <li><strong>Lost Knowledge & Silos:</strong> Critical data in heads, local files, creating single points of failure</li>
+                        <li><strong>The Visibility Gap:</strong> No real-time visibility into R&D status, broken Definition of Done</li>
+                        <li><strong>Manual Waste:</strong> Disproportionate time updating statuses across disconnected tools</li>
+                    </ul>
+                </div>
+
+                <div class="card solution-card">
+                    <span class="card-icon">✨</span>
+                    <h3>Our Vision</h3>
+                    <ul>
+                        <li><strong>Single Source of Truth:</strong> Where work happens and knowledge lives</li>
+                        <li><strong>AI-Powered Insights:</strong> Automated intelligence surfaces what matters</li>
+                        <li><strong>Speed & Autonomy:</strong> Remove blockers to context, enable faster decisions</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Four Pillars Section -->
+    <section id="pillars">
+        <div class="container">
+            <div class="section-header">
+                <h2>Four Strategic Pillars</h2>
+                <p>Upgrading our standards to unlock the full power of our new operating system</p>
+            </div>
+
+            <div class="pillars-grid">
+                <div class="pillar-card" data-number="A">
+                    <h3>Migrate Value, Not Noise</h3>
+                    <p>Moving clutter creates new mess. This migration is a forcing function to sanitize data.</p>
+                    <div class="requirement">
+                        <strong>The Requirement:</strong> Teams must audit and map their current Monday boards and Confluence pages.
+                    </div>
+                    <p><em>If a process cannot be documented clearly, it will not be migrated.</em></p>
+                </div>
+
+                <div class="pillar-card" data-number="B">
+                    <h3>Clarity Enables Automation</h3>
+                    <p>AI agents cannot summarize ambiguity. Clean inputs create automated value.</p>
+                    <div class="requirement">
+                        <strong>The Requirement:</strong> Define exactly what "done" means before syncing Jira to Notion.
+                    </div>
+                    <p><em>Without clear DoD, syncs create noise; with it, they create value.</em></p>
+                </div>
+
+                <div class="pillar-card" data-number="C">
+                    <h3>Open by Default</h3>
+                    <p>Building a shared brain where knowledge flows freely across teams.</p>
+                    <div class="requirement">
+                        <strong>The Requirement:</strong> Work-related pages belong in Team Space, not private pages.
+                    </div>
+                    <p><em>Sensitive data protected via permissions; everything else defaults to visibility.</em></p>
+                </div>
+
+                <div class="pillar-card" data-number="D">
+                    <h3>Structure Powers the AI</h3>
+                    <p>Standardization allows AI agents to read and act on your data.</p>
+                    <div class="requirement">
+                        <strong>The Requirement:</strong> Use standardized project and knowledge base templates.
+                    </div>
+                    <p><em>Breaking structure breaks AI. Customize content, not database structure.</em></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Organizational Structure -->
+    <section id="organization">
+        <div class="container">
+            <div class="section-header">
+                <h2>Organizational Structure</h2>
+                <p>Department-based hierarchy enabling cross-functional collaboration</p>
+            </div>
+
+            <div class="org-tree">
+                <div class="org-level">
+                    <div class="org-node leadership">
+                        <h4>Leadership</h4>
+                        <p>Strategic Direction</p>
+                    </div>
+                </div>
+
+                <div class="org-connections">
+                    <div class="org-line" style="left: 50%;"></div>
+                </div>
+
+                <div class="dept-grid">
+                    <div class="dept-card">
+                        <h4>🔧 Engineering</h4>
+                        <ul>
+                            <li>Full Stack Development</li>
+                            <li>R&D Group</li>
+                            <li>DevOps & Infrastructure</li>
+                        </ul>
+                    </div>
+
+                    <div class="dept-card">
+                        <h4>🎨 Product & Design</h4>
+                        <ul>
+                            <li>Product Management</li>
+                            <li>UX/UI Design</li>
+                            <li>Product Strategy</li>
+                        </ul>
+                    </div>
+
+                    <div class="dept-card">
+                        <h4>⚙️ Operations</h4>
+                        <ul>
+                            <li>IT & Security</li>
+                            <li>Finance</li>
+                            <li>Legal</li>
+                        </ul>
+                    </div>
+
+                    <div class="dept-card">
+                        <h4>📊 Data & Analytics</h4>
+                        <ul>
+                            <li>Data Engineering</li>
+                            <li>Analytics & Insights</li>
+                            <li>Business Intelligence</li>
+                        </ul>
+                    </div>
+
+                    <div class="dept-card">
+                        <h4>📈 Marketing & Growth</h4>
+                        <ul>
+                            <li>Marketing Operations</li>
+                            <li>Growth Strategy</li>
+                            <li>Brand & Content</li>
+                        </ul>
+                    </div>
+
+                    <div class="dept-card">
+                        <h4>👥 Customer Success</h4>
+                        <ul>
+                            <li>Care Collaboration</li>
+                            <li>Support Operations</li>
+                            <li>Customer Experience</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- n8n Workflow Automation -->
+    <section id="workflow">
+        <div class="container">
+            <div class="section-header">
+                <h2>AI Automation Workflow</h2>
+                <p>n8n-powered agents handling the heavy lifting</p>
+            </div>
+
+            <div class="workflow-diagram">
+                <img src="workflow.png" alt="n8n Workflow Automation Diagram" style="max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 0.5rem;">
+            </div>
+
+            <!-- Key AI Agents Section -->
+            <div style="margin: 4rem auto; padding: 3rem; background: var(--secondary-bg); border-radius: 1rem; max-width: 1200px;">
+                <h3 style="color: var(--accent-color); margin-bottom: 2rem; text-align: center; font-size: 2rem;">Key AI Agents</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-bottom: 3rem;">
+                    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 0.75rem; padding: 1.5rem; transition: transform 0.3s ease;">
+                        <h4 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1.2rem;">PM Auto-Pilot</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem;">Weekly Report Summaries</p>
+                    </div>
+                    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 0.75rem; padding: 1.5rem; transition: transform 0.3s ease;">
+                        <h4 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1.2rem;">Duplication Agent</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem;">Duplicate Detection & Management</p>
+                    </div>
+                    <div style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 0.75rem; padding: 1.5rem; transition: transform 0.3s ease;">
+                        <h4 style="color: var(--accent-color); margin-bottom: 0.5rem; font-size: 1.2rem;">Deep Analyzer Agent</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem;">Advanced Analysis & Insights</p>
+                    </div>
+                </div>
+
+                <!-- PM Agent Diagram -->
+                <div style="text-align: center; margin-top: 3rem;">
+                    <h4 style="color: var(--accent-color); margin-bottom: 1.5rem; font-size: 1.5rem;">PM Agent Architecture</h4>
+                    <img src="pm agent.png" alt="PM Agent Architecture Diagram" style="max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 0.5rem; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture">
+        <div class="container">
+            <div class="section-header">
+                <h2>Technical Architecture</h2>
+                <p>Secure, scalable, and automated infrastructure</p>
+            </div>
+
+            <div class="architecture-diagram">
+                <div class="arch-layer">
+                    <h4>🔒 Security Layer</h4>
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary);">Row-level access control with Google Groups sync</p>
+                    <div class="arch-components">
+                        <div class="arch-component">Default: Only Invited</div>
+                        <div class="arch-component">Google Groups Integration</div>
+                        <div class="arch-component">Row-Level Permissions</div>
+                        <div class="arch-component">Can View / Can Edit Properties</div>
+                    </div>
+                </div>
+
+                <div class="arch-layer">
+                    <h4>💾 Database Layer</h4>
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary);">Central master databases with filtered views</p>
+                    <div class="arch-components">
+                        <div class="arch-component">Projects (Master)</div>
+                        <div class="arch-component">Tasks (Universal)</div>
+                        <div class="arch-component">Knowledge/Docs</div>
+                        <div class="arch-component">Filtered Team Views</div>
+                    </div>
+                </div>
+
+                <div class="arch-layer">
+                    <h4>🔗 Integration Layer</h4>
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary);">Connected systems maintaining single source of truth</p>
+                    <div class="arch-components">
+                        <div class="arch-component">Jira → Notion (Read)</div>
+                        <div class="arch-component">HubSpot → Notion (One-way)</div>
+                        <div class="arch-component">GitHub Integration</div>
+                        <div class="arch-component">Slack Notifications</div>
+                    </div>
+                </div>
+
+                <div class="arch-layer">
+                    <h4>🤖 AI Agent Layer</h4>
+                    <p style="margin-bottom: 1rem; color: var(--text-secondary);">Automated intelligence and workflow orchestration</p>
+                    <div class="arch-components">
+                        <div class="arch-component">n8n Workflows</div>
+                        <div class="arch-component">AWS Bedrock AI</div>
+                        <div class="arch-component">Auto-Summaries</div>
+                        <div class="arch-component">Risk Detection</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Implementation Timeline -->
+    <section id="timeline">
+        <div class="container">
+            <div class="section-header">
+                <h2>Rollout Execution</h2>
+                <p>Phased implementation across teams and functions</p>
+            </div>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>Wave 1</h3>
+                        <div class="phase">Weeks 1-2</div>
+                        <p><strong>Scope:</strong> Individual Onboarding + Product & Care Collaboration</p>
+                        <ul style="margin-top: 1rem; list-style: none;">
+                            <li>✓ Enterprise search across all tools</li>
+                            <li>✓ Import Monday/Confluence data</li>
+                            <li>✓ Teamspace setup with filtered views</li>
+                            <li>✓ First automations deployed</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>Wave 2</h3>
+                        <div class="phase">Weeks 3-4</div>
+                        <p><strong>Scope:</strong> Design, Ops, and Marketing</p>
+                        <ul style="margin-top: 1rem; list-style: none;">
+                            <li>✓ Extend shared database structure</li>
+                            <li>✓ Campaign and design workflow mapping</li>
+                            <li>✓ Templates for briefs and playbooks</li>
+                            <li>✓ Content approval automations</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>Wave 3</h3>
+                        <div class="phase">Weeks 5-8</div>
+                        <p><strong>Scope:</strong> G&A and Cross-Functional Programs</p>
+                        <ul style="margin-top: 1rem; list-style: none;">
+                            <li>✓ Legal, Finance, People onboarded</li>
+                            <li>✓ Complex program tracking layer</li>
+                            <li>✓ Advanced permissions applied</li>
+                            <li>✓ Health roll-ups and risk flags</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-marker"></div>
+                    <div class="timeline-content">
+                        <h3>Wave 4</h3>
+                        <div class="phase">After Week 8</div>
+                        <p><strong>Scope:</strong> TPM and Cross-Functional Delivery</p>
+                        <ul style="margin-top: 1rem; list-style: none;">
+                            <li>✓ Full Jira integration for TPM</li>
+                            <li>✓ Program dependency tracking</li>
+                            <li>✓ Advanced delivery automations</li>
+                            <li>✓ Monday retired as reference only</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section id="cta">
+        <div class="container">
+            <div class="cta-section">
+                <h2>Action Required</h2>
+                <p>To initiate Wave 1, Team Leads must complete these immediate steps:</p>
+                
+                <div class="cta-list">
+                    <ul style="list-style: none;">
+                        <li><strong>1. Appoint a Notion Champion</strong><br>Choose one person to co-build the workspace with Edith</li>
+                        <li><strong>2. Audit Your Data</strong><br>Delete old/irrelevant Monday items. Rule: We migrate value, not noise</li>
+                        <li><strong>3. List Top 3 Pain Points</strong><br>Example: "I spend 2 hours on manual updates." We'll prioritize automating these first</li>
+                        <li><strong>4. Blueprint Your Ideal Workflow</strong><br>Think beyond tool constraints. How would you perfectly manage a project with zero limitations?</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Scroll Animation Observer
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all sections
+        document.querySelectorAll('section').forEach(section => {
+            observer.observe(section);
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add hover effects to workflow nodes
+        document.querySelectorAll('.workflow-node').forEach(node => {
+            node.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.1) translateY(-5px)';
+            });
+            node.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1) translateY(0)';
+            });
+        });
+
+        // Department cards interaction
+        document.querySelectorAll('.dept-card').forEach(card => {
+            card.addEventListener('click', function() {
+                this.style.animation = 'pulse 0.5s ease';
+                setTimeout(() => {
+                    this.style.animation = '';
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>
